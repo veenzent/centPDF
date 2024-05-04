@@ -1,10 +1,11 @@
-from ..main import app
-from fastapi import UploadFile, File
+from fastapi import APIRouter, UploadFile, File
 
 
 
+pdf = APIRouter()
 
-@app.post("/upload-file")
+
+@pdf.post("/upload-file")
 async def upload_file(file: UploadFile = File(...)):
     try:
         contents = await file.read()

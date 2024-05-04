@@ -8,7 +8,7 @@ from . import schemas
 # files = os.listdir(cwd)
 # pdf_files = [file for file in files if file.endswith('.pdf')]
 
-def merge_files(pdf_files):
+def merge_files(pdf_files: list[str]):
     # Create a pdf merger object
     pdf_merger = PyPDF2.PdfMerger()
     for file in pdf_files:
@@ -25,10 +25,9 @@ def merge_files(pdf_files):
 
 
 # - - - - - - - - - - - - Rotate PDF - - - - - - - - - - - -
-def rotate_pdf(cwd, pdf_files):
+def rotate_pdf(direction: str, pdf_files: list[str]):
     # Rotate each PDF file -90 degrees
     for file in pdf_files:
-        file = os.path.join(cwd, file)
         # Read the PDF file
         with open(file, 'rb') as f:
             reader = PyPDF2.PdfReader(f)
@@ -38,8 +37,10 @@ def rotate_pdf(cwd, pdf_files):
 
             # Iterate over the pages in the PDF file
             for page in reader.pages:
-                # Rotate the page 90 degrees counter clockwise
-                page.rotate(-90)
+                # Rotate the page with the given direction
+                # clockwise (right) = 90
+                # counter_clockwise (left) = -90
+                page.rotate(direction)
 
                 # Add the rotated page to the PdfWriter object
                 writer.add_page(page)
@@ -50,7 +51,7 @@ def rotate_pdf(cwd, pdf_files):
         print(f"Rotated {file} 90 degrees counter clockwise")
 
 
-def split_pdfs(directory, output_folder=None):
+def split_pdfs(file: list[str], output_folder=None):
   """
   Splits PDF files in a directory with more than one page.
 
@@ -59,27 +60,24 @@ def split_pdfs(directory, output_folder=None):
       output_folder: Optional path to the directory where split PDFs will be saved.
                         If not provided, uses the same directory as the input files.
   """
-  for filename in os.listdir(directory):
-    if filename.endswith(".pdf"):
-      input_file = os.path.join(directory, filename)
+  for filename in file:
+    with open(input_file, 'rb') as pdf_file:
+      pdf_reader = PdfReader(pdf_file)
+      num_pages = len(pdf_reader.pages)
       
-      with open(input_file, 'rb') as pdf_file:
-        pdf_reader = PdfReader(pdf_file)
-        num_pages = len(pdf_reader.pages)
+      if num_pages > 1:
+        if not output_folder:
+          output_folder = file  # Use the same directory if no output folder provided
         
-        if num_pages > 1:
-          if not output_folder:
-            output_folder = directory  # Use the same directory if no output folder provided
+        for page_num in range(num_pages):
+          pdf_writer = PdfWriter()
+          pdf_writer.add_page(pdf_reader.pages[page_num])
           
-          for page_num in range(num_pages):
-            pdf_writer = PdfWriter()
-            pdf_writer.add_page(pdf_reader.pages[page_num])
-            
-            output_filename = f"{filename.split('.')[0]}_page {page_num + 1}.pdf"
-            output_path = os.path.join(output_folder, output_filename)
-            with open(output_path, 'wb') as output_file:
-              pdf_writer.write(output_file)
-          
-          print(f"Split {filename} into {num_pages} separate PDFs.")
-        else:
-	        shutil.copy(os.path.join(directory, filename), os.path.join(output_folder, filename))
+          output_filename = f"{filename.split('.')[0]}_page {page_num + 1}.pdf"
+          output_path = os.path.join(output_folder, output_filename)
+          with open(output_path, 'wb') as output_file:
+            pdf_writer.write(output_file)
+        
+        print(f"Split {filename} into {num_pages} separate PDFs.")
+      else:
+        shutil.copy(os.path.join(file, filename), os.path.join(output_folder, filename))

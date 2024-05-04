@@ -1,6 +1,18 @@
 from pydantic import BaseModel
 
 
-# merge PDF
+# upload file
 class File(BaseModel):
-    path_to_file: str
+    upload_file: str
+
+# merge PDF
+class MergePDF(File):
+    pass
+
+# rotate PDF
+class RotatePDF(File):
+    pass
+
+# split PDF
+class SplitPDF(File):
+    pass
