@@ -1,4 +1,5 @@
 import os
+import shutil
 import PyPDF2
 # from PyPDF2 import PdfReader, PdfWriter
 from . import schemas
@@ -61,8 +62,8 @@ def split_pdfs(file: list[str], output_folder=None):
                         If not provided, uses the same directory as the input files.
   """
   for filename in file:
-    with open(input_file, 'rb') as pdf_file:
-      pdf_reader = PdfReader(pdf_file)
+    with open(filename, 'rb') as pdf_file:
+      pdf_reader = PyPDF2.PdfReader(pdf_file)
       num_pages = len(pdf_reader.pages)
       
       if num_pages > 1:
@@ -70,14 +71,16 @@ def split_pdfs(file: list[str], output_folder=None):
           output_folder = file  # Use the same directory if no output folder provided
         
         for page_num in range(num_pages):
-          pdf_writer = PdfWriter()
+          pdf_writer = PyPDF2.PdfWriter()
           pdf_writer.add_page(pdf_reader.pages[page_num])
-          
+
           output_filename = f"{filename.split('.')[0]}_page {page_num + 1}.pdf"
+          # TODO: zip all files
           output_path = os.path.join(output_folder, output_filename)
           with open(output_path, 'wb') as output_file:
             pdf_writer.write(output_file)
         
         print(f"Split {filename} into {num_pages} separate PDFs.")
       else:
+        # TODO: add to zipped files
         shutil.copy(os.path.join(file, filename), os.path.join(output_folder, filename))

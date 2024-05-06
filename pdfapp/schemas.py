@@ -1,18 +1,18 @@
 from pydantic import BaseModel
-
+from fastapi import File, UploadFile
 
 # upload file
-class File(BaseModel):
-    upload_file: str
+class PDFFile(BaseModel):
+    file: list[UploadFile] = File(...)
 
 # merge PDF
-class MergePDF(File):
+class MergePDF(PDFFile):
     pass
 
 # rotate PDF
-class RotatePDF(File):
+class RotatePDF(PDFFile):
     pass
 
 # split PDF
-class SplitPDF(File):
+class SplitPDF(PDFFile):
     pass
