@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pdfapp.routes import pdf
+from .pdfapp.routes import pdf
 
 
 app = FastAPI()
@@ -20,5 +20,5 @@ app.add_middleware(
 app.include_router(pdf)
 
 @app.get("/")
-async def Home():
+async def home():
     return {"message": "Welcome to centPDF"}

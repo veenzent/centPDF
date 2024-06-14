@@ -17,7 +17,7 @@ async def merge_pdf(files: schemas.MergePDF):
         pdf_bytes = await pdf_file.read()
         pdf_stream = BytesIO(pdf_bytes)
         merger.append(pdf_file.file)
-    
+
     merge_pdf = BytesIO()
     merger.write(merge_pdf)
     merger.close()
@@ -29,9 +29,15 @@ async def merge_pdf(files: schemas.MergePDF):
 
 @pdf.post("/rotate-pdf")
 async def rotate_pdf(file: schemas.RotatePDF):
-    try:
-        contents = await file.read()
-        # Do something with the file contents
-        return {"filename": file.filename, "contents": contents}
-    except Exception as e:
-        return {"error": str(e)}
+    if len(file) == 1:
+        pdf_bytes = await file[0].read()
+        reader = PyPDF2.PdfFileReader(BytesIO(pdf_bytes))
+        writer = PyPDF2.PdfFileWriter()
+
+        for page_num in range(reader.numPages):
+            page = reader.getPage(page_num)
+            page.rotateClockwise(90)
+            writer.addPage(page)
+
+        rotated_pdf = BytesIO()
+        writer.write(rotated_pdf)
