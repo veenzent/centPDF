@@ -1,36 +1,61 @@
-from . import schemas
 from io import BytesIO
 import PyPDF2
-from fastapi import UploadFile
+from fastapi import UploadFile, File
+from fastapi.responses import StreamingResponse, FileResponse
 from typing import List
 
-
+import asyncio
+from multiprocessing import Pool
+from functools import partial
 
 # - - - - - - - - - - - - Rotate PDF - - - - - - - - - - - -
-def rotate_pdf(direction: str, pdf_files: list[UploadFile]):
-    # Rotate each PDF file -90 degrees
-    for file in pdf_files:
-        # Read the PDF file
-        with open(file, 'rb') as f:
-            reader = PyPDF2.PdfReader(f)
+def rotate_page(page):
+    """
+    Rotates a page by 90 degrees clockwise.
 
-            # Create a PdfFileWriter object for writing the rotated PDF
+    Args:
+        page (PyPDF2.pdf.PageObject): The page object to rotate.
+
+    Returns:
+        PyPDF2.pdf.PageObject: The rotated page object.
+    """
+    page.rotate(90)
+    return page
+
+async def rotate_pdf(files: List[UploadFile] = File(description="Upload pdf files to rotate", media_type="application/pdf")):
+    """
+    Asynchronously rotates PDF files uploaded as `UploadFile` objects and returns a `StreamingResponse` object
+    containing the rotated PDF.
+
+    Args:
+        files (List[UploadFile], optional): A list of `UploadFile` objects representing the PDF files to rotate.
+            Defaults to `File(description="Upload pdf files to rotate", media_type="application/pdf")`.
+
+    Returns:
+        StreamingResponse: A `StreamingResponse` object containing the rotated PDF. The response headers include
+        a `Content-Disposition` header with a filename of `rotated_pdf.pdf`.
+
+    Raises:
+        None.
+
+    """
+    buffer = BytesIO()
+
+    with Pool() as pool:
+        for file in files:
+            pdf = PyPDF2.PdfReader(file.file)
             writer = PyPDF2.PdfWriter()
 
-            # Iterate over the pages in the PDF file
-            for page in reader.pages:
-                # Rotate the page with the given direction
-                # clockwise (right) = 90
-                # counter_clockwise (left) = -90
-                page.rotate(direction)
+            pages = pool.map(rotate_page, pdf.pages)
 
-                # Add the rotated page to the PdfWriter object
+            for page in pages:
                 writer.add_page(page)
 
-            # Write the rotated PDF to a new file
-            with open(file, 'wb') as rotated_file:
-                writer.write(rotated_file)
-        print(f"Rotated {file} 90 degrees counter clockwise")
+            writer.write(buffer)
+
+    buffer.seek(0)
+
+    return StreamingResponse(buffer, media_type='application/pdf', headers={"Content-Disposition": "attachment; filename=rotated_pdf.pdf"})
 
 
 # - - - - - - - - - - - - Merge PDF - - - - - - - - - - - -
@@ -63,11 +88,11 @@ def merge_pdf_files(pdf_files: List[UploadFile]) -> BytesIO:
 #     with open(filename, 'rb') as pdf_file:
 #       pdf_reader = PyPDF2.PdfReader(pdf_file)
 #       num_pages = len(pdf_reader.pages)
-      
+
 #       if num_pages > 1:
 #         if not output_folder:
 #           output_folder = file  # Use the same directory if no output folder provided
-        
+
 #         for page_num in range(num_pages):
 #           pdf_writer = PyPDF2.PdfWriter()
 #           pdf_writer.add_page(pdf_reader.pages[page_num])
@@ -77,7 +102,7 @@ def merge_pdf_files(pdf_files: List[UploadFile]) -> BytesIO:
 #           output_path = os.path.join(output_folder, output_filename)
 #           with open(output_path, 'wb') as output_file:
 #             pdf_writer.write(output_file)
-        
+
 #         print(f"Split {filename} into {num_pages} separate PDFs.")
 #       else:
 #         # TODO: add to zipped files
