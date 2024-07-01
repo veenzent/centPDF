@@ -1,15 +1,14 @@
 from io import BytesIO
 import PyPDF2
+from PyPDF2 import PageObject
 from fastapi import UploadFile, File
 from fastapi.responses import StreamingResponse, FileResponse
 from typing import List
-
-import asyncio
 from multiprocessing import Pool
-from functools import partial
+
 
 # - - - - - - - - - - - - Rotate PDF - - - - - - - - - - - -
-def rotate_page(page):
+def rotate_page(page: PageObject):
     """
     Rotates a page by 90 degrees clockwise.
 
@@ -75,15 +74,16 @@ def merge_pdf_files(pdf_files: List[UploadFile]) -> BytesIO:
 
 
 
-# def split_pdfs(file: list[str], output_folder=None):
-#   """
-#   Splits PDF files in a directory with more than one page.
+def split_pdf(file: list[str], output_folder=None):
+    """
+    Splits PDF files in a directory with more than one page.
 
-#   Args:
-#       directory: Path to the directory containing the PDF files.
-#       output_folder: Optional path to the directory where split PDFs will be saved.
-#                         If not provided, uses the same directory as the input files.
-#   """
+    Args:
+        directory: Path to the directory containing the PDF files.
+        output_folder: Optional path to the directory where split PDFs will be saved.
+                            If not provided, uses the same directory as the input files.
+    """
+    pass
 #   for filename in file:
 #     with open(filename, 'rb') as pdf_file:
 #       pdf_reader = PyPDF2.PdfReader(pdf_file)

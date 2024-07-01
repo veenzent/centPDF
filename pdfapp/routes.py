@@ -22,3 +22,9 @@ async def merge_pdf(pdf_files: List[UploadFile] = File(description="Upload files
     merge_pdf = await dependencies.merge_pdf_files(pdf_files)
 
     return StreamingResponse(merge_pdf, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=merged.pdf"})
+
+@pdf.post("/split-pdf")
+async def split_pdf(pdf_files: List[UploadFile] = \
+        File(description="Upload files to split", media_type="application/pdf")
+    ):
+    return await dependencies.split_pdf(pdf_files)
