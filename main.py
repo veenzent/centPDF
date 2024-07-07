@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pdfapp.routes import pdf
+from .pdfapp.routes import pdf
 
 
-app = FastAPI()
+app = FastAPI(title="centPDF", description="A comprehensive API for manipulating and extracting data from PDF files.")
 
 origins = [
     "https://127.0.0.1:5500"
