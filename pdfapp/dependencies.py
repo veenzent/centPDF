@@ -21,10 +21,11 @@ def rotate_page(page: PageObject):
     page.rotate(90)
     return page
 
-async def rotate_pdf(files: List[UploadFile] = File(description="Upload pdf files to rotate", media_type="application/pdf")):
+async def rotate_pdf(files: List[UploadFile] = \
+                     File(description="Upload pdf files to rotate", media_type="application/pdf")):
     """
-    Asynchronously rotates PDF files uploaded as `UploadFile` objects and returns a `StreamingResponse` object
-    containing the rotated PDF.
+    Asynchronously rotates PDF files uploaded as `UploadFile` objects and returns a 
+    `StreamingResponse` object containing the rotated PDF.
 
     Args:
         files (List[UploadFile], optional): A list of `UploadFile` objects representing the PDF files to rotate.
@@ -54,7 +55,9 @@ async def rotate_pdf(files: List[UploadFile] = File(description="Upload pdf file
 
     buffer.seek(0)
 
-    return StreamingResponse(buffer, media_type='application/pdf', headers={"Content-Disposition": "attachment; filename=rotated_pdf.pdf"})
+    return StreamingResponse(
+        buffer, media_type='application/pdf', headers={"Content-Disposition": "attachment; filename=rotated_pdf.pdf"}
+    )
 
 
 # - - - - - - - - - - - - Merge PDF - - - - - - - - - - - -
