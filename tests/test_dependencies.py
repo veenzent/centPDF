@@ -1,19 +1,26 @@
-# from fastapi.testclient import TestClient
-# from ..pdfapp import dependencies
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 
+def create_pdf(filename, text):
+    """
+    Creates a PDF file with content in text argument
 
-# def test_rotate_page():
-#     response = dependencies.rotate_page()
-#     pass
+    Args:
+        filename (str): The filename for the generated PDF.
+        text (str): The content of the PDF.
+    """
+    # Create a PDF canvas
+    pdf = canvas.Canvas(filename, pagesize=A4)
 
-# def test_rotate_pdf():
-#     response = dependencies.rotate_pdf()
-#     pass
+    # Set font and font size
+    pdf.setFont("Helvetica", 18)
 
-# def test_merge_pdf_files():
-#     response = dependencies.merge_pdf_files()
-#     pass
+    # Draw the text at upper left corner with margins of (approximately) 50 points
+    #   print(A4)
+    w, h = A4
+    pdf.drawCentredString(50, h - 50, text)
+    # pdf.showPage()
 
-# def test_split_pdf():
-#     dependencies.split_pdf()
-#     pass
+    # Save the PDF
+    pdf.save()
+    print(f"PDF created successfully: {filename}")
